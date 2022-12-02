@@ -149,4 +149,3 @@ const result = rounds.reduce((scores, row) => {
 });
 
 console.log(result)
-console.log(result.human == 13889)
