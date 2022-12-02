@@ -86,12 +86,6 @@ const normalizeMap = {
   [HUMAN_SCISSORS]: SCISSORS,
 }
 
-const contextMap = {
-  [ROCK]: [HUMAN_ROCK, ELF_ROCK],
-  [PAPER]: [HUMAN_PAPER, ELF_PAPER],
-  [SCISSORS]: [HUMAN_SCISSORS, ELF_SCISSORS],
-}
-
 const resultCodeMap = {
   X: 'LOSE',
   Y: 'DRAW',
@@ -99,11 +93,6 @@ const resultCodeMap = {
 }
 
 const normalize = (play) => normalizeMap[play];
-
-const recontextualize = (play, context) => {
-  const i = context == 'human' ? 0 : 1;
-  return contextMap[play][i];
-}
 
 const getWinningPlay = (play) => winPlayMap[play];
 const getDrawingPlay = (play) => drawPlayMap[play];
