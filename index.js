@@ -28,4 +28,5 @@ tier.splice(tier.indexOf(max_2), 1);
 const max_3 = Math.max(...tier);
 tier.splice(tier.indexOf(max_3), 1);
 
-console.log('Day 2:', max_1 + max_2 + max_3);
+console.log('Day 1 pt2:', max_1 + max_2 + max_3);
+
