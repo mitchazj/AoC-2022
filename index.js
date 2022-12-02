@@ -41,85 +41,112 @@ const parseDay2 = (input) => {
 
 const rounds = parseDay2(day2);
 
+const ROCK = 'R';
+const PAPER = 'P';
+const SCISSORS = 'S';
+
+const ELF_ROCK = 'A';
+const ELF_PAPER = 'B';
+const ELF_SCISSORS = 'C';
+
 const HUMAN_ROCK = 'X';
 const HUMAN_PAPER = 'Y';
 const HUMAN_SCISSORS = 'Z';
 
-const isRock = (play) => play == 'A' || play == 'X';
-const isPaper = (play) => play == 'B' || play == 'Y';
-const isScissors = (play) => play == 'C' || play == 'Z';
+const valueMap = {
+  [ROCK]: 1,
+  [PAPER]: 2,
+  [SCISSORS]: 3,
+}
 
-const valueOfPlay = (play) => {
-  if (isRock(play)) {
-    return 1; // Rock
-  } else if (isPaper(play)) {
-    return 2; // Paper
-  } else if (isScissors(play)) {
-    return 3; // Scissors
+const winPlayMap = {
+  [ROCK]: PAPER,
+  [PAPER]: SCISSORS,
+  [SCISSORS]: ROCK,
+}
+
+const losePlayMap = {
+  [ROCK]: SCISSORS,
+  [PAPER]: ROCK,
+  [SCISSORS]: PAPER,
+}
+
+const drawPlayMap = {
+  [ROCK]: ROCK,
+  [PAPER]: PAPER,
+  [SCISSORS]: SCISSORS,
+}
+
+const normalizeMap = {
+  [ELF_ROCK]: ROCK,
+  [HUMAN_ROCK]: ROCK,
+  [ELF_PAPER]: PAPER,
+  [HUMAN_PAPER]: PAPER,
+  [ELF_SCISSORS]: SCISSORS,
+  [HUMAN_SCISSORS]: SCISSORS,
+}
+
+const contextMap = {
+  [ROCK]: [HUMAN_ROCK, ELF_ROCK],
+  [PAPER]: [HUMAN_PAPER, ELF_PAPER],
+  [SCISSORS]: [HUMAN_SCISSORS, ELF_SCISSORS],
+}
+
+const resultCodeMap = {
+  X: 'LOSE',
+  Y: 'DRAW',
+  Z: 'WIN',
+}
+
+const normalize = (play) => normalizeMap[play];
+
+const recontextualize = (play, context) => {
+  const i = context == 'human' ? 0 : 1;
+  return contextMap[play][i];
+}
+
+const getWinningPlay = (play) => winPlayMap[play];
+const getDrawingPlay = (play) => drawPlayMap[play];
+const getLosingPlay = (play) => losePlayMap[play];
+
+const battlePointsFrom = (elf_play, your_play) => {
+  if (getWinningPlay(elf_play) == your_play) return [0, 6]; // you won
+  if (getDrawingPlay(elf_play) == your_play) return [3, 3]; // you drew
+  if (getLosingPlay(elf_play) == your_play) return [6, 0];  // you lost
+}
+
+const score = (round) => {
+  const battle_points = battlePointsFrom(round.elf, round.human);
+  return {
+    elf: valueMap[round.elf] + battle_points[0],
+    human: valueMap[round.human] + battle_points[1],
   }
 }
 
-const getYourPlay = (elf_play, desired_result) => {
-  if (isRock(elf_play)) {
-    if (desired_result == 'X') {
-      return HUMAN_SCISSORS; // lose
-    } else if (desired_result == 'Y') {
-      return HUMAN_ROCK; // draw
-    } else if (desired_result == 'Z') {
-      return HUMAN_PAPER; // win
-    }
-  } else if (isPaper(elf_play)) {
-    if (desired_result == 'X') {
-      return HUMAN_ROCK; // lose
-    } else if (desired_result == 'Y') {
-      return HUMAN_PAPER; // draw
-    } else if (desired_result == 'Z') {
-      return HUMAN_SCISSORS; // win
-    }
-  } else if (isScissors(elf_play)) {
-    if (desired_result == 'X') {
-      return HUMAN_PAPER; // lose
-    } else if (desired_result == 'Y') {
-      return HUMAN_SCISSORS; // draw
-    } else if (desired_result == 'Z') {
-      return HUMAN_ROCK; // win
-    }
+const getDesiredPlay = (play, desired_result_code) => {
+  switch(resultCodeMap[desired_result_code]) {
+    case 'WIN': return getWinningPlay(play);
+    case 'LOSE': return getLosingPlay(play);
+    case 'DRAW': return getDrawingPlay(play);
   }
 }
 
-const battlePointsFrom = (round) => {
-  const elf_play = round[0];
-  const your_play = round[1];
-  
-  if (isRock(your_play) && isRock(elf_play)) return [3, 3];
-  if (isRock(your_play) && isPaper(elf_play)) return [6, 0];
-  if (isRock(your_play) && isScissors(elf_play)) return [0, 6];
-  
-  if (isPaper(your_play) && isRock(elf_play)) return [0, 6];
-  if (isPaper(your_play) && isPaper(elf_play)) return [3, 3];
-  if (isPaper(your_play) && isScissors(elf_play)) return [6, 0];
-  
-  if (isScissors(your_play) && isRock(elf_play)) return [6, 0];
-  if (isScissors(your_play) && isPaper(elf_play)) return [0, 6];
-  if (isScissors(your_play) && isScissors(elf_play)) return [3, 3];
-
-  return [3, 3]; // should never happen though
-}
-
-const score = (round, withV2Understanding = false) => {
-  if (withV2Understanding) {
-    round = [round[0], getYourPlay(round[0], round[1])];
+const result = rounds.reduce((scores, row) => {
+  const row_result = score(true ? {
+    elf: normalize(row[0]),
+    human: getDesiredPlay(normalize(row[0]), row[1])
+  } : {
+    elf: normalize(row[0]),
+    human: normalize(row[1]),
+  });
+  return {
+    elf: scores.elf + row_result.elf,
+    human: scores.human + row_result.human
   }
-  
-  const elf_play_score = valueOfPlay(round[0]);
-  const your_play_score = valueOfPlay(round[1]);
-  const points = battlePointsFrom(round);
-  return [elf_play_score + points[0], your_play_score + points[1]];
-}
-
-const result = rounds.reduce((scores, round) => {
-  const _score = score(round, true);
-  return [scores[0] + _score[0], scores[1] + _score[1]]
-}, [0, 0]);
+}, {
+  elf: 0,
+  human: 0,
+});
 
 console.log(result)
+console.log(result.human == 13889)
