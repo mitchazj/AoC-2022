@@ -95,10 +95,10 @@ const runDay2 = () => {
   const getDrawingPlay = (play) => drawPlayMap[play];
   const getLosingPlay = (play) => losePlayMap[play];
   
-  const battlePointsFrom = (elf_play, your_play) => {
-    if (getWinningPlay(elf_play) == your_play) return [0, 6]; // you won
-    if (getDrawingPlay(elf_play) == your_play) return [3, 3]; // you drew
-    if (getLosingPlay(elf_play) == your_play) return [6, 0];  // you lost
+  const battlePointsFrom = (adversary, you) => {
+    if (getWinningPlay(adversary) == you) return [0, 6]; // you won
+    if (getDrawingPlay(adversary) == you) return [3, 3]; // you drew
+    if (getLosingPlay(adversary) == you) return [6, 0];  // you lost
   }
   
   const score = (round) => {
