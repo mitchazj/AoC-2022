@@ -211,17 +211,6 @@ const runDay4 = () => {
   console.log(number_overlapped);
 }
 const runDay5 = () => {
-//   const fake_input = `    [D]    
-// [N] [C]    
-// [Z] [M] [P]
-//  1   2   3 
-
-// move 1 from 2 to 1
-// move 3 from 1 to 3
-// move 2 from 2 to 1
-// move 1 from 1 to 2`;
-//   const day5 = fake_input;
-  
   const start_of_instructions = day5.split('\n').findIndex(x => x.indexOf('move') > -1);
   const instructions = day5.split('\n').slice(start_of_instructions);
   
