@@ -1,4 +1,4 @@
-const { day1, day2, day3 } = require('./input.js');
+const { day1, day2, day3, day4 } = require('./input.js');
 const divide = () => console.log('///////////////////////////////////////');
 
 const runDay1 = () => {
@@ -182,7 +182,36 @@ const runDay3 = () => {
 
   console.log(sum_of_badges)
 }
+const runDay4 = () => {
+  const input = day4.split('\n').filter(x => x.length > 0);
+
+  const isContained = (pair, largerPair) => {
+    return pair[0] >= largerPair[0] && pair[1] <= largerPair[1];
+  }
+
+  const overlaps = (pair, otherPair) => {
+    return pair[0] <= otherPair[0] && pair[1] >= otherPair[0];
+  }
+
+  const pairs = input.map(line => {
+    return line.split(',').map(elf_assignment => {
+      return elf_assignment.split('-').map(x => parseInt(x));
+    });
+  });
+
+  const number_contained = pairs.map(pair => {
+    return isContained(pair[0], pair[1]) || isContained(pair[1], pair[0]);
+  }).filter(x => x).length;
+  
+  const number_overlapped = pairs.map(pair => {
+    return overlaps(pair[0], pair[1]) || overlaps(pair[1], pair[0]);
+  }).filter(x => x).length;
+
+  console.log(number_contained);
+  console.log(number_overlapped);
+}
 
 // runDay1();
 // runDay2();
-runDay3();
+// runDay3();
+runDay4();
