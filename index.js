@@ -1,4 +1,4 @@
-const { day1, day2, day3, day4 } = require('./input.js');
+const { day1, day2, day3, day4, day5 } = require('./input.js');
 const divide = () => console.log('///////////////////////////////////////');
 
 const runDay1 = () => {
@@ -210,8 +210,70 @@ const runDay4 = () => {
   console.log(number_contained);
   console.log(number_overlapped);
 }
+const runDay5 = () => {
+//   const fake_input = `    [D]    
+// [N] [C]    
+// [Z] [M] [P]
+//  1   2   3 
+
+// move 1 from 2 to 1
+// move 3 from 1 to 3
+// move 2 from 2 to 1
+// move 1 from 1 to 2`;
+//   const day5 = fake_input;
+  
+  const start_of_instructions = day5.split('\n').findIndex(x => x.indexOf('move') > -1);
+  const instructions = day5.split('\n').slice(start_of_instructions);
+  
+  const columns = [];
+  const stack_txt = day5.substring(0, day5.indexOf(instructions[0]));
+  const stack_txt_lines = stack_txt.split('\n').filter(x => x.length > 0);
+  const stack_txt_lines_data = stack_txt_lines.slice(0, stack_txt_lines.length - 1)
+  const stack_txt_line_column_names = stack_txt_lines[stack_txt_lines.length - 1];
+  const no_columns = stack_txt_line_column_names.split('')
+    .filter(x => x.indexOf(' ') === -1).length;
+  
+  for (let k = stack_txt_lines_data.length - 1; k >= 0; --k) {
+    // work backwards through each line
+    const line = stack_txt_lines_data[k];
+    // now work through each column
+    for (let j = 0; j < no_columns; ++j) {
+      const value = line[stack_txt_line_column_names.indexOf(j + 1)];
+      if (value !== ' ') {
+        if (columns[j]) columns[j].push(value);
+        else columns[j] = [value];
+      }
+    }
+  }
+
+  // now work through the instructions
+  for (let k = 0; k < instructions.length; ++k) {
+    const instr_data = instructions[k].split(' ');
+    const number_to_move = parseInt(instr_data[1]);
+    const move_from = parseInt(instr_data[3]) - 1;
+    const move_to = parseInt(instr_data[5]) - 1;
+
+    // OG moving method
+    // for (let j = 0; j < number_to_move; ++j) {
+    //   let value = columns[move_from].pop();
+    //   columns[move_to].push(value);
+    // }
+
+    // 9001 method
+    const crates_moving = columns[move_from]
+      .slice(columns[move_from].length - number_to_move)
+    const crates_staying = columns[move_from]
+      .slice(0, columns[move_from].length - number_to_move);
+    columns[move_from] = crates_staying;
+    columns[move_to] = columns[move_to].concat(crates_moving);
+  }
+  
+  const top_crates = columns.map(x => x[x.length - 1]).join('');
+  console.log(top_crates)
+}
 
 // runDay1();
 // runDay2();
 // runDay3();
-runDay4();
+// runDay4();
+runDay5();
