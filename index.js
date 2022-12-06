@@ -1,7 +1,10 @@
 const { day1, day2, day3, day4, day5, day6 } = require('./input.js');
+
+const runDay = (n) => global["runDay" + n]();
+const runToday = () => runDay((new Date()).getDate());
 const divide = () => console.log('///////////////////////////////////////');
 
-const runDay1 = () => {
+global.runDay1 = () => {
   const chunks = day1.split('\n');
 
   let totals = [];
@@ -29,7 +32,7 @@ const runDay1 = () => {
 
   console.log('Day 1 pt2:', max_1 + max_2 + max_3);
 }
-const runDay2 = () => {
+global.runDay2 = () => {
   const parseDay2 = (input) => {
     return input.split('\n').filter(x => x.length > 0).map(line => {
       return line.split(' ')
@@ -137,7 +140,7 @@ const runDay2 = () => {
   console.log("Day 2:", result(true).human);
   console.log("Day 2 pt2:", result(false).human);
 }
-const runDay3 = () => {
+global.runDay3 = () => {
   const input = day3.split('\n').filter(x => x.length > 0);
 
   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -182,7 +185,7 @@ const runDay3 = () => {
 
   console.log(sum_of_badges)
 }
-const runDay4 = () => {
+global.runDay4 = () => {
   const input = day4.split('\n').filter(x => x.length > 0);
 
   const isContained = (pair, largerPair) => {
@@ -210,7 +213,7 @@ const runDay4 = () => {
   console.log(number_contained);
   console.log(number_overlapped);
 }
-const runDay5 = () => {
+global.runDay5 = () => {
   const start_of_instructions = day5.split('\n').findIndex(x => x.indexOf('move') > -1);
   const instructions = day5.split('\n').slice(start_of_instructions);
 
@@ -260,13 +263,13 @@ const runDay5 = () => {
   const top_crates = columns.map(x => x[x.length - 1]).join('');
   console.log(top_crates)
 }
-const runDay6 = () => {
+global.runDay6 = () => {
   const input = day6;
   const NUM_UNIQUE = 14;
-  
+
   const allUniqueChars = (str) => str.split('')
     .filter((x, i, a) => a.indexOf(x) === i).length === str.length;
-  
+
   let marker_is_at = 0;
   for (let j = NUM_UNIQUE; j < input.length; ++j) {
     const substr = input.substring(j - NUM_UNIQUE, j);
@@ -275,13 +278,8 @@ const runDay6 = () => {
       break;
     }
   }
-  
+
   console.log(marker_is_at);
 }
 
-// runDay1();
-// runDay2();
-// runDay3();
-// runDay4();
-// runDay5();
-runDay6();
+runToday();
