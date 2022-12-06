@@ -263,7 +263,10 @@ const runDay5 = () => {
 const runDay6 = () => {
   const input = day6;
   const NUM_UNIQUE = 14;
-  const allUniqueChars = (str) => str.split('').filter((x, i, a) => a.indexOf(x) === i).length === str.length;
+  
+  const allUniqueChars = (str) => str.split('')
+    .filter((x, i, a) => a.indexOf(x) === i).length === str.length;
+  
   let marker_is_at = 0;
   for (let j = NUM_UNIQUE; j < input.length; ++j) {
     const substr = input.substring(j - NUM_UNIQUE, j);
@@ -272,6 +275,7 @@ const runDay6 = () => {
       break;
     }
   }
+  
   console.log(marker_is_at);
 }
 
