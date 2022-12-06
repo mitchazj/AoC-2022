@@ -1,4 +1,4 @@
-const { day1, day2, day3, day4, day5 } = require('./input.js');
+const { day1, day2, day3, day4, day5, day6 } = require('./input.js');
 const divide = () => console.log('///////////////////////////////////////');
 
 const runDay1 = () => {
@@ -145,7 +145,7 @@ const runDay3 = () => {
   const valueLookup = alphabet + alphabetUppercase;
 
   const getValueOfChar = (c) => valueLookup.indexOf(c) + 1;
-  
+
   const getCharInBothHalves = (line) => {
     const firstHalf = line.substring(0, line.length / 2);
     const secondHalf = line.substring(line.length / 2);
@@ -202,7 +202,7 @@ const runDay4 = () => {
   const number_contained = pairs.map(pair => {
     return isContained(pair[0], pair[1]) || isContained(pair[1], pair[0]);
   }).filter(x => x).length;
-  
+
   const number_overlapped = pairs.map(pair => {
     return overlaps(pair[0], pair[1]) || overlaps(pair[1], pair[0]);
   }).filter(x => x).length;
@@ -213,7 +213,7 @@ const runDay4 = () => {
 const runDay5 = () => {
   const start_of_instructions = day5.split('\n').findIndex(x => x.indexOf('move') > -1);
   const instructions = day5.split('\n').slice(start_of_instructions);
-  
+
   const columns = [];
   const stack_txt = day5.substring(0, day5.indexOf(instructions[0]));
   const stack_txt_lines = stack_txt.split('\n').filter(x => x.length > 0);
@@ -221,7 +221,7 @@ const runDay5 = () => {
   const stack_txt_line_column_names = stack_txt_lines[stack_txt_lines.length - 1];
   const no_columns = stack_txt_line_column_names.split('')
     .filter(x => x.indexOf(' ') === -1).length;
-  
+
   for (let k = stack_txt_lines_data.length - 1; k >= 0; --k) {
     // work backwards through each line
     const line = stack_txt_lines_data[k];
@@ -256,13 +256,28 @@ const runDay5 = () => {
     columns[move_from] = crates_staying;
     columns[move_to] = columns[move_to].concat(crates_moving);
   }
-  
+
   const top_crates = columns.map(x => x[x.length - 1]).join('');
   console.log(top_crates)
+}
+const runDay6 = () => {
+  const input = day6;
+  const NUM_UNIQUE = 14;
+  const allUniqueChars = (str) => str.split('').filter((x, i, a) => a.indexOf(x) === i).length === str.length;
+  let marker_is_at = 0;
+  for (let j = NUM_UNIQUE; j < input.length; ++j) {
+    const substr = input.substring(j - NUM_UNIQUE, j);
+    if (allUniqueChars(substr)) {
+      marker_is_at = j;
+      break;
+    }
+  }
+  console.log(marker_is_at);
 }
 
 // runDay1();
 // runDay2();
 // runDay3();
 // runDay4();
-runDay5();
+// runDay5();
+runDay6();
