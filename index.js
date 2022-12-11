@@ -1,4 +1,4 @@
-const { day1, day2, day3, day4, day5, day6 } = require('./input.js');
+const { day1, day2, day3, day4, day5, day6, day7 } = require('./input.js');
 
 const runDay = (n) => global["runDay" + n]();
 const runToday = () => runDay((new Date()).getDate());
@@ -281,5 +281,181 @@ global.runDay6 = () => {
 
   console.log(marker_is_at);
 }
+global.runDay7 = () => {
+  const real_input = day7;
+  const sec_input = `$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k`;
 
-runToday();
+  const parseSecondInput = (walk) => {
+    const STATE = {
+      reading: 0,
+      moving: 1,
+      listing: 2
+    }
+    
+    const getStateOfLine = (line) => {
+      if (line.startsWith('$')) {
+        if (line.substring(2, 4) === 'cd') return STATE.moving;
+        if (line.substring(2, 4) === 'ls') return STATE.listing;
+      }
+      return STATE.reading;
+    }
+
+    const movePlace = (place, line) => {
+      const where = line.substring(5);
+      if (where === '..') {
+        return place.slice(0, place.length - 1);
+      } else {
+        place.push(where);
+        return place;
+      }
+    }
+    
+    const addChild = (store, place, child) => {
+      let property = store;
+      for (let j = 0; j < place.length; ++j) {
+        property.size += child.size;
+        property = property.children.find(child => child.name == place[j]);
+      }
+      property.size += child.size;
+      property.children.push(child);
+      return store;
+    }
+
+    const readEntry = (line) => {
+      line = line.split(' ');
+      return {
+        name: line[1],
+        type: line[0] === 'dir' ? 'dir' : 'file',
+        size: line[0] === 'dir' ? null : parseInt(line[0]),
+        children: []
+      }
+    }
+    
+    let place = [];
+    let store = {
+      name: '/',
+      type: 'dir',
+      size: null,
+      children: []
+    }
+    const lines = walk.split('\n');
+    
+    for (line of lines.slice(1)) {
+      const state = getStateOfLine(line);
+      if (state === STATE.moving) {
+        place = movePlace(place, line);
+      } else if (state === STATE.listing) {
+        // no action needed atm
+      } else if (state === STATE.reading) {
+        store = addChild(store, place, readEntry(line));
+      }
+    }
+    
+    return store;
+  }
+  
+  const input = `- / (dir)
+  - a (dir)
+    - e (dir)
+      - i (file, size=584)
+    - f (file, size=29116)
+    - g (file, size=2557)
+    - h.lst (file, size=62596)
+  - b.txt (file, size=14848514)
+  - c.dat (file, size=8504156)
+  - d (dir)
+    - j (file, size=4060174)
+    - d.log (file, size=8033020)
+    - d.ext (file, size=5626152)
+    - k (file, size=7214296)`;
+  
+  const input_lines = input.split('\n');
+
+  const parseLine = (line) => {
+    const name = line.substring(line.indexOf('-') + 2, line.lastIndexOf('(') - 1);
+    const type = line.substring(
+      line.lastIndexOf('(') +  1,
+      line.lastIndexOf(',') !== -1 ? line.lastIndexOf(',') : line.lastIndexOf(')')
+    );
+    const size = parseInt(line.substring(line.lastIndexOf('=') + 1, line.lastIndexOf(')')));
+    return {
+      name,
+      type,
+      size
+    }
+  }
+
+  const parseSubtree = (lines) => {
+    const parsed = {
+      ...parseLine(lines.shift()),
+      children: []
+    }
+    
+    if (lines.length === 0) return parsed;
+    
+    const sibling_line_indexes = lines
+      .map((x, i) => x.indexOf('-') == lines[0].indexOf('-') ? i : -1)
+      .filter(x => x !== -1);
+    
+    while (sibling_line_indexes.length > 0) {
+      const children_lines = sibling_line_indexes.length == 1
+        ? lines.slice(sibling_line_indexes[0])
+        : lines.slice(sibling_line_indexes[0], sibling_line_indexes[1]);
+      
+      parsed.children.push({
+        ...parseLine(lines[sibling_line_indexes.shift()]),
+        children: parseSubtree(children_lines).children
+      });
+    }
+    return parsed;
+  }
+  
+  const getSize = (x) => x.size ?? x;
+  const applySizeOfDirectory = (dir) => {
+    if (dir.type !== 'dir') return dir.size; // it's a file, so it has a size :)
+    dir.size = dir.children.reduce((a, b) => a + getSize(applySizeOfDirectory(b)), 0);
+    return dir;
+  }
+
+  // const parsed = applySizeOfDirectory(parseSubtree(input_lines));
+  // const parsed = parseSecondInput(sec_input);
+  const parsed = parseSecondInput(day7);
+
+  const getAllDirectories = (dir) => dir.type === 'dir'
+      ? [dir, ...dir.children.map(child => getAllDirectories(child)).flat()]
+      : [];
+
+  const all_directories = getAllDirectories(parsed);
+  // const without_children = all_directories.map(dir => ({...dir, children: null}));
+  // console.log(JSON.stringify(all_directories, null, 2));
+
+  const answer = all_directories.filter(x => x.size <= 100000).reduce((a, b) => a + b.size, 0);
+  console.log(answer);
+
+  
+}
+
+runDay(7);
+// runToday();
