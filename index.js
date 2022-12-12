@@ -313,7 +313,7 @@ $ ls
       moving: 1,
       listing: 2
     }
-    
+
     const getStateOfLine = (line) => {
       if (line.startsWith('$')) {
         if (line.substring(2, 4) === 'cd') return STATE.moving;
@@ -331,7 +331,7 @@ $ ls
         return place;
       }
     }
-    
+
     const addChild = (store, place, child) => {
       let property = store;
       for (let j = 0; j < place.length; ++j) {
@@ -352,7 +352,7 @@ $ ls
         children: []
       }
     }
-    
+
     let place = [];
     let store = {
       name: '/',
@@ -361,7 +361,7 @@ $ ls
       children: []
     }
     const lines = walk.split('\n');
-    
+
     for (line of lines.slice(1)) {
       const state = getStateOfLine(line);
       if (state === STATE.moving) {
@@ -372,10 +372,10 @@ $ ls
         store = addChild(store, place, readEntry(line));
       }
     }
-    
+
     return store;
   }
-  
+
   const input = `- / (dir)
   - a (dir)
     - e (dir)
@@ -390,13 +390,13 @@ $ ls
     - d.log (file, size=8033020)
     - d.ext (file, size=5626152)
     - k (file, size=7214296)`;
-  
+
   const input_lines = input.split('\n');
 
   const parseLine = (line) => {
     const name = line.substring(line.indexOf('-') + 2, line.lastIndexOf('(') - 1);
     const type = line.substring(
-      line.lastIndexOf('(') +  1,
+      line.lastIndexOf('(') + 1,
       line.lastIndexOf(',') !== -1 ? line.lastIndexOf(',') : line.lastIndexOf(')')
     );
     const size = parseInt(line.substring(line.lastIndexOf('=') + 1, line.lastIndexOf(')')));
@@ -412,18 +412,18 @@ $ ls
       ...parseLine(lines.shift()),
       children: []
     }
-    
+
     if (lines.length === 0) return parsed;
-    
+
     const sibling_line_indexes = lines
       .map((x, i) => x.indexOf('-') == lines[0].indexOf('-') ? i : -1)
       .filter(x => x !== -1);
-    
+
     while (sibling_line_indexes.length > 0) {
       const children_lines = sibling_line_indexes.length == 1
         ? lines.slice(sibling_line_indexes[0])
         : lines.slice(sibling_line_indexes[0], sibling_line_indexes[1]);
-      
+
       parsed.children.push({
         ...parseLine(lines[sibling_line_indexes.shift()]),
         children: parseSubtree(children_lines).children
@@ -431,30 +431,42 @@ $ ls
     }
     return parsed;
   }
-  
+
   const getSize = (x) => x.size ?? x;
   const applySizeOfDirectory = (dir) => {
-    if (dir.type !== 'dir') return dir.size; // it's a file, so it has a size :)
-    dir.size = dir.children.reduce((a, b) => a + getSize(applySizeOfDirectory(b)), 0);
+    if (dir.type !== 'dir') return dir.size;
+    dir.size = dir.children
+      .reduce((a, b) => a + getSize(applySizeOfDirectory(b)), 0);
     return dir;
   }
 
   // const parsed = applySizeOfDirectory(parseSubtree(input_lines));
   // const parsed = parseSecondInput(sec_input);
+  
   const parsed = parseSecondInput(day7);
 
   const getAllDirectories = (dir) => dir.type === 'dir'
-      ? [dir, ...dir.children.map(child => getAllDirectories(child)).flat()]
-      : [];
+    ? [dir, ...dir.children.map(child => getAllDirectories(child)).flat()]
+    : [];
 
   const all_directories = getAllDirectories(parsed);
   // const without_children = all_directories.map(dir => ({...dir, children: null}));
   // console.log(JSON.stringify(all_directories, null, 2));
 
-  const answer = all_directories.filter(x => x.size <= 100000).reduce((a, b) => a + b.size, 0);
+  const answer = all_directories
+    .filter(x => x.size <= 100000).reduce((a, b) => a + b.size, 0);
+
   console.log(answer);
 
-  
+  const DISK_CAPACITY = 70000000;
+  const DISK_USED = parsed.size;
+  const DISK_SPACE = DISK_CAPACITY - DISK_USED;
+  const MINIMUM_TO_DELETE = 30000000 - DISK_SPACE;
+  const smallest_to_delete = Math.min(...all_directories
+    .filter(x => x.size > MINIMUM_TO_DELETE)
+    .map(x => x.size));
+
+  console.log(smallest_to_delete);
 }
 
 runDay(7);
